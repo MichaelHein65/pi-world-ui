@@ -219,20 +219,20 @@ git pull origin main
 ```
 .
 ├── PyWorld.html          ← Main Application (468 Zeilen, optimiert)
-├── Index.html            ← Alternative UI (Alternative Design)
-├── Index Kopie.html      ← Backup (Nicht in Verwendung)
-├── PyWorld Kopie.html    ← Backup (Nicht in Verwendung)
 ├── pi/
 │   └── weather.png       ← Wetterbild (wird vom Pi aktualisiert)
 ├── README.md             ← GitHub Projekt-Übersicht
-├── README-LOCAL.md       ← Erweiterte Dokumentation
+├── README-LOCAL.md       ← Erweiterte Dokumentation & Features
 ├── OPTIMIZATIONS.md      ← Detailliertes Changelog & Metriken
 ├── DEVELOPMENT.md        ← Diese Datei (Developer Guide)
 ├── .gitignore            ← Git Ignore Rules
 ├── .editorconfig         ← Editor-Konfiguration (VS Code)
 ├── .prettierrc            ← Prettier Code-Format Config
-└── quality-check.sh      ← Automated Quality Check Script
+├── quality-check.sh      ← Automated Quality Check Script
+└── .git/                 ← Git Repository (History & Backup)
 ```
+
+**Hinweis**: Alle Versionen und Änderungen sind in Git verfügbar. Backup-Dateien sind nicht mehr nötig.
 
 ## Support & Fragen
 
