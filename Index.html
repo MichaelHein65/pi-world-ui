@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Michaels Pi-World</title>
+  <style>
+    :root{
+      --bg1: 255, 115, 0;
+      --bg2: 0, 163, 255;
+      --glass-bg: 255,255,255;
+      --glass-alpha: 0.12;
+      --glass-stroke: rgba(255,255,255,0.25);
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius-xl: 22px;
+      --radius-lg: 18px;
+      --gap: 16px;
+      --text: #eef5ff;
+      --muted: #b7c3d6;
+      --ok: #42d392;
+      --warn: #ffd666;
+      --err: #ff6b6b;
+    }
+    @media (prefers-color-scheme: light){
+      :root{
+        --text: #0e1625;
+        --muted:#516079;
+        --glass-alpha: 0.18;
+        --glass-stroke: rgba(0,0,0,0.15);
+      }
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto, Inter, system-ui, "Helvetica Neue", Arial;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 1200px at 10% 10%, rgba(var(--bg1), .35), transparent 60%),
+        radial-gradient(1200px 1200px at 90% 20%, rgba(var(--bg2), .35), transparent 60%),
+        linear-gradient(135deg, rgba(14,16,37,.85), rgba(11,14,27,.85));
+      min-height:100%;
+      -webkit-font-smoothing:antialiased;
+      background-attachment: fixed;
+    }
+    .container{
+      max-width: min(92vw, 1600px);
+      margin: 40px auto;
+      padding: 0 20px 80px;
+    }
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: var(--gap);
+      margin-bottom: 20px;
+    }
+    .title{
+      font-size: clamp(28px, 5vw, 56px);
+      font-weight:800;
+      background: conic-gradient(from 210deg, rgba(var(--bg2),1), rgba(var(--bg1),1));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .badge{
+      padding: 10px 14px;
+      border-radius: 999px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      background: rgba(var(--glass-bg), var(--glass-alpha));
+      border: 1px solid var(--glass-stroke);
+      box-shadow: var(--shadow);
+      font-size: 14px;
+      color: var(--muted);
+      display:flex; align-items:center; gap:8px;
+    }
+    .dot{ width:10px; height:10px; border-radius:50%; display:inline-block }
+
+    .card{
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      background: rgba(var(--glass-bg), var(--glass-alpha));
+      border: 1px solid var(--glass-stroke);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius-xl);
+      overflow:hidden;
+    }
+    .card-body{ padding: 16px; }
+    #weather-card .card-body{
+      min-height: 40vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #weather-img{
+      width: 50%;
+      height: auto;
+      max-height: 60vh;
+      object-fit: contain;
+      aspect-ratio: auto;
+      display: block;
+      margin: 0 auto;
+    }
+    .info-row{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--gap);
+      margin-top: var(--gap);
+      margin-bottom: 30px;
+    }
+    .info-tile{
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 18px 20px;
+      border-radius: var(--radius-lg);
+    }
+    .label{ font-size:14px; color:var(--muted); margin-bottom:6px }
+    .value{ font-size: clamp(22px, 3.5vw, 34px); font-weight:700; }
+
+    .tiles {
+      display: grid;
+      gap: var(--gap);
+      grid-template-columns: repeat(10, 1fr);
+      margin-top: 30px;
+    }
+    .tile{
+      position:relative; border-radius: var(--radius-lg);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      background: rgba(var(--glass-bg), var(--glass-alpha));
+      border:1px solid var(--glass-stroke); box-shadow: var(--shadow);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:700; cursor:pointer; user-select:none;
+      transition: transform .15s ease, background .2s, color .2s;
+    }
+    .tile-square { aspect-ratio: 1 / 1; font-size: clamp(12px, 1.6vw, 16px); }
+    .tile:hover { transform: translateY(-4px); background: rgba(255,255,255,.25); color:#fff; }
+    .tile-danger{ background: rgba(255, 107, 107, .18); }
+    .tile-ok{ background: rgba(66, 211, 146, .18); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="title">Michaels Pi-World</div>
+      <div class="badge" id="status-badge">
+        <span class="dot" id="status-dot" style="background:var(--warn)"></span>
+        <span id="status-text">lädt…</span>
+      </div>
+    </header>
+
+    <section class="card hero" id="weather-card" aria-label="Wetterbild">
+      <div class="card-body">
+       <img id="weather-img" alt="Aktuelles Wetterbild"
+        src="/pi/weather.png?ts=0" onerror="handleWeatherError()" />
+      <div id="weather-fallback" class="fallback" style="display:none;">
+          weather.png nicht gefunden. Wird erneut versucht…
+        </div>
+      </div>
+    </section>
+
+    <section class="info-row">
+      <div class="card info-tile" aria-live="polite">
+        <div style="text-align:left;">
+          <div class="value" id="clock">--:--:--</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="value" id="date">--.--.----</div>
+        </div>
+      </div>
+      <div class="card info-tile">
+        <div style="text-align:left;">
+          <div class="value"><span id="temp">--.-</span> °C</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="value"><span id="press">----</span> hPa</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tiles">
+      <div class="tile tile-square tile-danger" id="btn-led-off">LED aus</div>
+      <div class="tile tile-square tile-ok" id="btn-clock-on">Uhr an</div>
+    </section>
+
+    <footer>
+      v1 · Glass+Gradient UI · Made for speed.
+    </footer>
+  </div>
+
+  <script>
+    const SENSOR_URL = "http://100.73.51.13:5056/api/live-sensor";
+    const SENSOR_POLL_MS = 15_000;
+
+    const LED_BASE = "http://100.73.51.13:5050";
+    const CLOCK_IDX = 5;
+
+    const img = document.getElementById('weather-img');
+    img.src = `/pi/weather.png?ts=${Date.now()}`;
+
+
+    let lastPi = null;
+    let driftTimer = null;
+
+    function startLocalTick(){
+      if(driftTimer) clearInterval(driftTimer);
+      driftTimer = setInterval(()=>{
+        if(!lastPi) return;
+        lastPi = new Date(lastPi.getTime() + 1000);
+        document.getElementById('clock').textContent =
+          lastPi.toLocaleTimeString('de-DE', {hour12:false});
+      }, 1000);
+    }
+
+    async function fetchPiTime(){
+      try {
+        const res = await fetch(SENSOR_URL, { cache:"no-store" });
+        if(!res.ok) throw new Error("HTTP "+res.status);
+        const j = await res.json();
+
+        if(j.pi_date) document.getElementById('date').textContent = j.pi_date;
+        if(j.pi_time){
+          const [hh,mm,ss] = j.pi_time.split(':').map(Number);
+          const now = new Date();
+          lastPi = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hh, mm, ss);
+          document.getElementById('clock').textContent = j.pi_time;
+          startLocalTick();
+        }
+      } catch(e) {
+        console.warn("Pi-Zeit nicht abrufbar", e);
+      }
+    }
+
+    async function fetchSensor(){
+      try{
+        const ac = new AbortController();
+        const id = setTimeout(()=>ac.abort(), 6000);
+        const res = await fetch(SENSOR_URL, { signal: ac.signal, cache:"no-store" });
+        clearTimeout(id);
+        if(!res.ok) throw new Error("HTTP "+res.status);
+        const j = await res.json();
+
+        const t = (typeof j.temperature_c === "number") ? j.temperature_c : j.temp;
+        const p = (typeof j.pressure_hpa  === "number") ? j.pressure_hpa  : j.press;
+
+        if(typeof t === "number") document.getElementById('temp').textContent  = t.toFixed(1);
+        if(typeof p === "number") document.getElementById('press').textContent = Math.round(p);
+
+        if(j.updated_at){
+          const dt = new Date(j.updated_at);
+          document.getElementById('updated').textContent = isNaN(dt) ? j.updated_at : dt.toLocaleString();
+        } else {
+          document.getElementById('updated').textContent = new Date().toLocaleTimeString();
+        }
+
+        setStatus("Sensor OK", "ok");
+      }catch(err){
+        setStatus("Sensor offline", "err");
+      }
+    }
+
+    function handleWeatherError(){
+      const img = document.getElementById('weather-img');
+      const fb  = document.getElementById('weather-fallback');
+      img.style.display = "none";
+      fb.style.display  = "flex";
+      setTimeout(()=>{
+        img.src = `/pi/weather.png?ts=${Date.now()}`;
+        img.style.display = "block";
+        fb.style.display  = "none";
+      }, 5000);
+    }
+
+    function setStatus(text, level){
+      const dot = document.getElementById('status-dot');
+      const t   = document.getElementById('status-text');
+      t.textContent = text;
+      if(level==="ok") dot.style.background = "var(--ok)";
+      else if(level==="warn") dot.style.background = "var(--warn)";
+      else dot.style.background = "var(--err)";
+    }
+
+    async function postJSON(url){
+      const ac = new AbortController();
+      const id = setTimeout(()=>ac.abort(), 5000);
+      try{
+        const r = await fetch(url, {method:"POST", signal:ac.signal, mode:"cors"});
+        clearTimeout(id);
+        return r.ok;
+      }catch{ clearTimeout(id); return false; }
+    }
+    async function ledOff(){
+      if (await postJSON(`${LED_BASE}/stop`)) return true;
+      if (await postJSON(`${LED_BASE}/effect/-1`)) return true;
+      return await postJSON(`${LED_BASE}/effect/999`);
+    }
+    async function clockOn(){
+      return await postJSON(`${LED_BASE}/effect/${CLOCK_IDX}`);
+    }
+    document.addEventListener('click', async (e)=>{
+      if(e.target && e.target.id === 'btn-led-off'){
+        const ok = await ledOff();
+        setStatus(ok ? "LED aus" : "LED aus fehlgeschlagen", ok ? "ok" : "err");
+      }
+      if(e.target && e.target.id === 'btn-clock-on'){
+        const ok = await clockOn();
+        setStatus(ok ? "Uhr an" : "Uhr an fehlgeschlagen", ok ? "ok" : "err");
+      }
+    });
+
+    window.addEventListener('load', ()=>{
+      setStatus("bereit", "ok");
+      const img = document.getElementById('weather-img');
+      img.src = `weather.png?ts=${Date.now()}`;
+      fetchSensor();
+      setInterval(fetchSensor, SENSOR_POLL_MS);
+      fetchPiTime();
+      setInterval(fetchPiTime, 10_000);
+    });
+  </script>
+</body>
+</html>
