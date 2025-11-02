@@ -8,6 +8,7 @@ class PiWorldDashboard {
             color: '#ff0000',
             brightness: 100
         };
+        this.intervals = [];
         
         this.init();
     }
@@ -18,11 +19,17 @@ class PiWorldDashboard {
         
         // Start sensor data updates
         this.updateSensorData();
-        setInterval(() => this.updateSensorData(), 2000); // Update every 2 seconds
+        this.intervals.push(setInterval(() => this.updateSensorData(), 2000)); // Update every 2 seconds
         
         // Update system info
         this.updateSystemInfo();
-        setInterval(() => this.updateSystemInfo(), 5000); // Update every 5 seconds
+        this.intervals.push(setInterval(() => this.updateSystemInfo(), 5000)); // Update every 5 seconds
+    }
+
+    cleanup() {
+        // Clean up intervals to prevent memory leaks
+        this.intervals.forEach(interval => clearInterval(interval));
+        this.intervals = [];
     }
 
     setupLEDControls() {
@@ -79,10 +86,12 @@ class PiWorldDashboard {
         
         if (this.ledState.on) {
             const opacity = this.ledState.brightness / 100;
+            const rgba = this.hexToRgba(this.ledState.color, 0.6);
+            const rgbaLight = this.hexToRgba(this.ledState.color, 0.4);
+            
             ledPreview.style.background = this.ledState.color;
             ledPreview.style.opacity = opacity;
-            ledPreview.style.boxShadow = `0 0 30px ${this.hexToRgba(this.ledState.color, 0.6)}, 
-                                           0 0 60px ${this.hexToRgba(this.ledState.color, 0.4)}`;
+            ledPreview.style.boxShadow = `0 0 30px ${rgba}, 0 0 60px ${rgbaLight}`;
         } else {
             ledPreview.style.background = '#333333';
             ledPreview.style.opacity = 0.3;
@@ -150,15 +159,17 @@ class PiWorldDashboard {
 
     generateRandomValue(min, max) {
         // Add some variance to make it look realistic
-        if (!this.lastValues) this.lastValues = {};
-        if (!this.lastValues[`${min}-${max}`]) {
-            this.lastValues[`${min}-${max}`] = (min + max) / 2;
+        if (!this.lastValues) this.lastValues = new Map();
+        
+        const key = `${min}-${max}`;
+        if (!this.lastValues.has(key)) {
+            this.lastValues.set(key, (min + max) / 2);
         }
         
-        const lastValue = this.lastValues[`${min}-${max}`];
+        const lastValue = this.lastValues.get(key);
         const change = (Math.random() - 0.5) * 5; // Small random change
         const newValue = Math.max(min, Math.min(max, lastValue + change));
-        this.lastValues[`${min}-${max}`] = newValue;
+        this.lastValues.set(key, newValue);
         
         return newValue;
     }
