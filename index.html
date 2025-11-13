@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pi World - Raspberry Pi 5 Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="background-gradient"></div>
+    
+    <div class="container">
+        <header class="glass-card header-card">
+            <h1>🍓 Pi World</h1>
+            <p class="subtitle">Raspberry Pi 5 Dashboard</p>
+        </header>
+
+        <div class="grid">
+            <!-- CPU Temperature Card -->
+            <div class="glass-card sensor-card">
+                <div class="card-icon">🌡️</div>
+                <h2>CPU Temperature</h2>
+                <div class="sensor-value" id="cpu-temp">--°C</div>
+                <div class="sensor-bar">
+                    <div class="sensor-bar-fill" id="cpu-temp-bar"></div>
+                </div>
+            </div>
+
+            <!-- Memory Usage Card -->
+            <div class="glass-card sensor-card">
+                <div class="card-icon">💾</div>
+                <h2>Memory Usage</h2>
+                <div class="sensor-value" id="memory-usage">--%</div>
+                <div class="sensor-bar">
+                    <div class="sensor-bar-fill" id="memory-bar"></div>
+                </div>
+            </div>
+
+            <!-- CPU Usage Card -->
+            <div class="glass-card sensor-card">
+                <div class="card-icon">⚡</div>
+                <h2>CPU Usage</h2>
+                <div class="sensor-value" id="cpu-usage">--%</div>
+                <div class="sensor-bar">
+                    <div class="sensor-bar-fill" id="cpu-bar"></div>
+                </div>
+            </div>
+
+            <!-- Disk Usage Card -->
+            <div class="glass-card sensor-card">
+                <div class="card-icon">💿</div>
+                <h2>Disk Usage</h2>
+                <div class="sensor-value" id="disk-usage">--%</div>
+                <div class="sensor-bar">
+                    <div class="sensor-bar-fill" id="disk-bar"></div>
+                </div>
+            </div>
+
+            <!-- LED Control Card -->
+            <div class="glass-card led-card">
+                <div class="card-icon">💡</div>
+                <h2>LED Control</h2>
+                
+                <div class="led-preview" id="led-preview"></div>
+                
+                <div class="control-group">
+                    <label for="led-color">Color</label>
+                    <input type="color" id="led-color" value="#ff0000">
+                </div>
+
+                <div class="control-group">
+                    <label for="led-brightness">Brightness</label>
+                    <input type="range" id="led-brightness" min="0" max="100" value="100">
+                    <span id="brightness-value">100%</span>
+                </div>
+
+                <div class="led-buttons">
+                    <button class="btn btn-primary" id="led-on">Turn On</button>
+                    <button class="btn btn-secondary" id="led-off">Turn Off</button>
+                </div>
+
+                <div class="preset-colors">
+                    <button class="color-preset" data-color="#ff0000" style="background: #ff0000;"></button>
+                    <button class="color-preset" data-color="#00ff00" style="background: #00ff00;"></button>
+                    <button class="color-preset" data-color="#0000ff" style="background: #0000ff;"></button>
+                    <button class="color-preset" data-color="#ffff00" style="background: #ffff00;"></button>
+                    <button class="color-preset" data-color="#ff00ff" style="background: #ff00ff;"></button>
+                    <button class="color-preset" data-color="#00ffff" style="background: #00ffff;"></button>
+                    <button class="color-preset" data-color="#ffffff" style="background: #ffffff;"></button>
+                </div>
+            </div>
+
+            <!-- System Info Card -->
+            <div class="glass-card info-card">
+                <div class="card-icon">📊</div>
+                <h2>System Info</h2>
+                <div class="info-row">
+                    <span class="info-label">Uptime:</span>
+                    <span class="info-value" id="uptime">--</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Load Average:</span>
+                    <span class="info-value" id="load-avg">--</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Network:</span>
+                    <span class="info-value" id="network-status">Connected</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Last Updated:</span>
+                    <span class="info-value" id="last-update">--</span>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>Raspberry Pi 5 • Real-time monitoring</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
